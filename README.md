@@ -46,4 +46,4 @@ docker compose exec spark spark-submit spark_jobs/04_nosql_sales_to_gold.py
 - `fact_supply_sales_item`: nguồn NoSQL, explode từ nested array `items`.
 
 ## 7. Ghi chú
-File này là scaffold demo học tập. Khi triển khai thật, nên thêm Hive/Nessie catalog cho Iceberg, orchestration bằng Airflow, DQ bằng Great Expectations, và dashboard trong Metabase/Power BI.
+
