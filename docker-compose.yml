@@ -1,0 +1,67 @@
+services:
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    ports: ["9000:9000", "9001:9001"]
+    environment:
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: minio123456
+    volumes: ["./minio_data:/data"]
+
+  create-buckets:
+    image: minio/mc:latest
+    depends_on: [minio]
+    entrypoint: >
+      /bin/sh -c "sleep 5;
+      mc alias set local http://minio:9000 admin minio123456;
+      mc mb -p local/lakehouse;
+      mc mb -p local/landing;
+      mc mb -p local/bronze;
+      mc mb -p local/silver;
+      mc mb -p local/gold;
+      exit 0;"
+
+  mongo:
+    image: mongo:7
+    ports: ["27017:27017"]
+    volumes: ["./mongo_data:/data/db", "./data/nosql:/datasets"]
+
+  spark:
+    image: apache/spark:3.5.3
+    user: root
+    depends_on: [minio, mongo]
+    environment:
+      SPARK_MODE: client
+      AWS_ACCESS_KEY_ID: admin
+      AWS_SECRET_ACCESS_KEY: minio123456
+    volumes:
+      - ./:/workspace
+    working_dir: /workspace
+    command: tail -f /dev/null
+
+  trino:
+    image: trinodb/trino:latest
+    ports: ["8080:8080"]
+    depends_on: [minio]
+    volumes:
+      - ./config/trino/catalog:/etc/trino/catalog
+
+  metabase-db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: metabase
+      POSTGRES_PASSWORD: metabase
+      POSTGRES_DB: metabase
+    volumes: ["./metabase_pg:/var/lib/postgresql/data"]
+
+  metabase:
+    image: metabase/metabase:latest
+    ports: ["3000:3000"]
+    depends_on: [metabase-db, trino]
+    environment:
+      MB_DB_TYPE: postgres
+      MB_DB_DBNAME: metabase
+      MB_DB_PORT: 5432
+      MB_DB_USER: metabase
+      MB_DB_PASS: metabase
+      MB_DB_HOST: metabase-db
