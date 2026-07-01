@@ -1,6 +1,6 @@
 # Olist + NoSQL MinIO Data Platform Demo
 
-Demo này mô phỏng kiến trúc doanh nghiệp: nguồn quan hệ Olist CSV + nguồn NoSQL MongoDB JSON → MinIO/Lakehouse → Spark Bronze/Silver/Gold → Trino/Metabase.
+Demo mô phỏng kiến trúc doanh nghiệp: nguồn quan hệ Olist CSV + nguồn NoSQL MongoDB JSON → MinIO/Lakehouse → Spark Bronze/Silver/Gold → Trino/Metabase.
 
 ## 1. Chuẩn bị
 ```bash
